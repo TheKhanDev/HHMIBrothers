@@ -90,9 +90,8 @@ function setupModalEvents() {
     
     // Order placement buttons
     whatsappOrderBtn.addEventListener('click', placeWhatsAppOrder);
-    emailOrderBtn.addEventListener('click', placeEmailOrder);
+    emailOrderBtn.addEventListener('click', placeEmailOrder);  // ← THIS SHOULD BE placeEmailOrder
 }
-
 /**
  * Opens the order modal for a specific product
  * @param {number} productId - ID of the product to order
@@ -204,6 +203,8 @@ function createProductCard(product) {
              onerror="this.src='assets/images/placeholder-icon.png';">
         <div class="product-info">
             <h3 class="product-title">${product.name}</h3>
+            <p class="product-category">${product.category}</p>  <!-- ✅ ADDED CATEGORY -->
+            <p class="product-description">${product.description}</p>  <!-- ✅ ADDED DESCRIPTION -->
             <p class="product-price">PKR ${product.price.toLocaleString()}</p>
             <button class="buy-now" data-id="${product.id}">Buy Now</button>
         </div>
@@ -355,11 +356,10 @@ function setupThemeEvents() {
     // Mobile theme toggle
     themeToggleNav.addEventListener('click', function(e) {
         e.preventDefault();
-        if (window.innerWidth <= 768) {
-            themeSelectorNav.classList.toggle('active');
-            console.log('Mobile theme selector toggled');
-        }
-    });
+        // ✅ Works on both mobile AND desktop
+        themeSelectorNav.classList.toggle('active');
+        console.log('Theme selector toggled');
+});
     
     // Theme selection
     themeOptions.forEach(option => {
@@ -449,25 +449,25 @@ function scrollToTopFunction() {
 function placeWhatsAppOrder() {
     console.log('Placing order via WhatsApp');
     
-    if (!validateForm()) {
-        console.warn('Form validation failed for WhatsApp order');
-        return;
-    }
+    if (!validateForm()) return;
     
     const orderData = getOrderData();
     const message = formatOrderMessage(orderData);
-    const phone = "+923441092910";
+    const phone = "923429438436"; // No + sign for WhatsApp
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
     
-    // Open WhatsApp in new tab
+    console.log('WhatsApp URL:', url);
     window.open(url, '_blank');
     closeOrderModal();
-    
-    console.log('WhatsApp order initiated');
 }
+
 
 /**
  * Places order via Email
+//  */
+
+/**
+ * Places order via Email - WORKING VERSION
  */
 function placeEmailOrder() {
     console.log('Placing order via Email');
@@ -478,16 +478,144 @@ function placeEmailOrder() {
     }
     
     const orderData = getOrderData();
-    const subject = `NEW ORDER - HHMI Brothers`;
+    const email = "hhmibrothers@gmail.com";
+    const subject = `NEW ORDER - HHMI Brothers - ${orderData.product}`;
     const body = formatOrderMessage(orderData);
-    const email = "waqaskhank128@gmail.com";
-    const url = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
-    // Open default email client
-    window.location.href = url;
-    closeOrderModal();
+    // Create the email content with clear instructions
+    const emailContent = `${body}
+
+---
+ORDER SUMMARY:
+• Product: ${orderData.product}
+• Size: ${orderData.size}  
+• Quantity: ${orderData.quantity}
+• Total: PKR ${orderData.total.toLocaleString()}
+• Customer: ${orderData.name}
+• Phone: ${orderData.phone}
+• Address: ${orderData.address}
+${orderData.email ? `• Email: ${orderData.email}` : ''}
+${orderData.instructions ? `• Instructions: ${orderData.instructions}` : ''}
+
+Thank you for your order! We'll contact you within 24 hours. 📦`;
     
-    console.log('Email order initiated');
+    // Show copy instructions to user
+    showEmailCopyInstructions(emailContent, email, subject);
+}
+
+/**
+ * Shows instructions to copy and send email
+ */
+function showEmailCopyInstructions(emailContent, email, subject) {
+    // Create a modal popup
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        padding: 20px;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto;">
+            <h3 style="color: #e74c3c; margin-bottom: 20px; text-align: center;">📧 Send Your Order via Email</h3>
+            
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #e74c3c;">
+                <h4 style="margin: 0 0 10px 0; color: #2c3e50;">Instructions:</h4>
+                <ol style="margin: 0; padding-left: 20px; color: #555;">
+                    <li>Copy the order details below</li>
+                    <li>Open your email app (Gmail, Outlook, etc.)</li>
+                    <li>Create new email to: <strong>${email}</strong></li>
+                    <li>Paste the order details and send</li>
+                </ol>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: bold; color: #2c3e50;">Order Details (Click to copy):</label>
+                <textarea id="emailOrderText" style="width: 100%; height: 200px; padding: 12px; border: 2px solid #bdc3c7; border-radius: 5px; font-family: monospace; font-size: 12px; resize: vertical;" readonly>${emailContent}</textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button onclick="copyEmailOrderText()" style="background: #27ae60; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    📋 Copy Text
+                </button>
+                <button onclick="closeEmailModal()" style="background: #e74c3c; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    ✓ I've Sent It
+                </button>
+            </div>
+            
+            <div style="margin-top: 15px; text-align: center;">
+                <a href="https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailContent)}" 
+                   target="_blank" 
+                   style="color: #3498db; text-decoration: none; font-size: 14px;">
+                   ✨ Open Gmail directly (if available)
+                </a>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Add global functions for the buttons
+    window.copyEmailOrderText = function() {
+        const textarea = document.getElementById('emailOrderText');
+        textarea.select();
+        document.execCommand('copy');
+        
+        // Show copied message
+        const button = event.target;
+        const originalText = button.textContent;
+        button.textContent = '✅ Copied!';
+        button.style.background = '#2ecc71';
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.background = '#27ae60';
+        }, 2000);
+    };
+    
+    window.closeEmailModal = function() {
+        modal.remove();
+        closeOrderModal();
+    };
+}
+
+/**
+ * Alternative: Try to open Gmail directly
+ */
+function placeEmailOrderGmail() {
+    console.log('Placing order via Gmail');
+    
+    if (!validateForm()) {
+        console.warn('Form validation failed for Email order');
+        return;
+    }
+    
+    const orderData = getOrderData();
+    const subject = `NEW ORDER - HHMI Brothers - ${orderData.product}`;
+    const body = formatOrderMessage(orderData);
+    const email = "hhmibrothers@gmail.com";
+    
+    // Try Gmail direct URL
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    // Try to open Gmail
+    const opened = window.open(gmailUrl, '_blank');
+    
+    if (!opened || opened.closed || typeof opened.closed == 'undefined') {
+        // Gmail failed, fallback to clipboard method
+        console.log('Gmail blocked, falling back to clipboard');
+        copyOrderToClipboard(body, subject);
+    } else {
+        closeOrderModal();
+    }
 }
 
 /**
@@ -520,31 +648,29 @@ function getOrderData() {
  * @param {Object} data - Order data
  * @returns {string} Formatted message
  */
+
 function formatOrderMessage(data) {
-    return `NEW ORDER - HHMI Brothers
+    // ✅ SIMPLIFIED MESSAGE FORMAT
+    return `🛍️ NEW ORDER - HHMI Brothers
 
-ORDER DETAILS:
-────────────────
+📦 ORDER DETAILS:
 Product: ${data.product}
-Unit Price: PKR ${data.price.toLocaleString()}
+Price: PKR ${data.price.toLocaleString()}
 Quantity: ${data.quantity}
-Total Amount: PKR ${data.total.toLocaleString()}
-
-CUSTOMER INFORMATION:
-────────────────
-Full Name: ${data.name}
-Phone: ${data.phone}
-Email: ${data.email}
-Delivery Address: ${data.address}
+Total: PKR ${data.total.toLocaleString()}
 Size: ${data.size}
 
-SPECIAL INSTRUCTIONS:
-────────────────
-${data.instructions || 'None'}
+👤 CUSTOMER INFO:
+Name: ${data.name}
+Phone: ${data.phone}
+${data.email ? `Email: ${data.email}` : ''}
+Address: ${data.address}
 
-────────────────
+📝 INSTRUCTIONS:
+${data.instructions || 'None'}
+⏰ Order Time: ${data.time};
+───────────────────────
 Order placed via HHMI Brothers Website
-Order Time: ${data.time}
 Please process this order and contact the customer for confirmation.`;
 }
 
@@ -559,21 +685,28 @@ function validateForm() {
     const address = document.getElementById('customer-address').value;
     const size = document.getElementById('product-size').value;
     
+    console.log('Form validation - Fields:', { name, phone, email, address, size }); // Debug
+    
     // Check required fields
-    if (!name || !phone || !email || !address || !size) {
-        alert('Please fill in all required fields.');
+    if (!name || !phone || !address || !size) {
+        alert('Please fill in all required fields (Name, Phone, Address, Size).');
         return false;
     }
     
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-        alert('Please enter a valid email address.');
+    // ✅ MAKE EMAIL OPTIONAL or basic validation
+    if (email && !isValidEmail(email)) {
+        alert('Please enter a valid email address or leave it empty.');
         return false;
     }
     
     console.log('Form validation passed');
     return true;
+}
+
+// ✅ ADD HELPER FUNCTION FOR EMAIL VALIDATION
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
 }
 
 // Debug: Log initialization complete

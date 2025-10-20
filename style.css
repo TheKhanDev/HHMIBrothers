@@ -156,7 +156,8 @@ nav {
 }
 
 /* Show theme selector on hover */
-.theme-toggle-nav:hover .theme-selector-nav {
+.theme-toggle-nav:hover .theme-selector-nav, 
+.theme-selector-nav.active {
     display: flex;
 }
 
@@ -182,6 +183,7 @@ nav {
 .theme-option.active {
     background-color: var(--secondary);
     border-color: var(--accent);
+    transform: translateX(5px);
 }
 
 /* Theme color preview circle */
@@ -443,6 +445,28 @@ nav {
     color: var(--accent);
     margin-bottom: 20px;
     font-size: 1.4rem;
+}
+
+/* 📝 PRODUCT DESCRIPTION & CATEGORY STYLES */
+.product-category {
+    color: #666;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.product-description {
+    color: #777;
+    font-size: 13px;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    height: 40px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .buy-now {
@@ -895,12 +919,21 @@ footer {
         border: 1px solid var(--border);
     }
 
-    .theme-toggle-nav:hover .theme-selector-nav {
-        display: none;
+            /* ✅ NEW CODE - Desktop hover */
+    @media (min-width: 769px) {
+        .theme-toggle-nav:hover .theme-selector-nav {
+            display: flex;
+        }
     }
 
-    .theme-selector-nav.active {
-        display: flex;
+    /* Mobile click */
+    @media (max-width: 768px) {
+        .theme-selector-nav.active {
+            display: flex;
+        }
+    }
+        .theme-selector-nav.active {
+            display: flex;
     }
 
     /* Mobile controls */
@@ -1117,6 +1150,8 @@ footer {
 
 /* Default Theme - Blue and Red */
 body.default-theme {
+    --primary: #2c3e50;    /* Main brand color */
+    --accent: #e74c3c;     /* Accent/button color */
     --primary: #2c3e50;
     --secondary: #ecf0f1;
     --accent: #e74c3c;

@@ -443,7 +443,7 @@ function handleDeliveryQuery(message) {
  * Handles contact-related queries
  */
 function handleContactQuery(message) {
-    return "Contact HHMI Brothers: 📞\n\n📍 Store Location: Saddar Bazar, Peshawar\n📞 Phone/WhatsApp: +92 344 1092910\n📧 Email: waqaskhank128@gmail.com\n🕒 Business Hours: 10:00 AM - 9:00 PM\n\nVisit our store to try jackets or message us for assistance!";
+    return "Contact HHMI Brothers: 📞\n\n📍 Store Location: Saddar Bazar, Peshawar\n📞 Phone/WhatsApp: +92 3429438436\n📧 Email: hhmibrothers@gmail.com\n🕒 Business Hours: 10:00 AM - 9:00 PM\n\nVisit our store to try jackets or message us for assistance!";
 }
 
 /**
